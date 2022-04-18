@@ -14,15 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type item struct {
-	StoryURL  string
-	Source    string
-	comments  string
-	CrawledAt time.Time
-	Comments  string
-	Title     string
-}
-
 // tsafeApartments apartments map with mutex
 // for concurrency use
 type tsafeApartments struct {
