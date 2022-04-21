@@ -17,31 +17,30 @@ import (
 // tsafeApartments apartments map with mutex
 // for concurrency use
 type tsafeApartments struct {
-	apartments map[apartment]bool
+	apartments map[Apartment]bool
 	mut        sync.Mutex
 }
 
-type apartment struct {
-	availDate string
-	unitTitle string
-	bedrooms  int
-	sqFootage int
-	rent      int
+type Apartment struct {
+	AvailDate string
+	UnitTitle string
+	Bedrooms  int
+	SqFootage int
+	Rent      int
 }
 
-func (aptmts *tsafeApartments) insertApartment(apt apartment) {
+func (aptmts *tsafeApartments) insertApartment(apt Apartment) {
 	aptmts.mut.Lock()
 	defer aptmts.mut.Unlock()
 	aptmts.apartments[apt] = true
 }
 
 func newApartmentsSet() *tsafeApartments {
-	aptmtSet := map[apartment]bool{}
+	aptmtSet := map[Apartment]bool{}
 	return &tsafeApartments{apartments: aptmtSet}
 }
 
-func main() {
-	handleCliConfigs()
+func GetApartments() []Apartment {
 	apartments := newApartmentsSet()
 	c := colly.NewCollector(
 		colly.AllowedDomains("www.uli.com"),
@@ -49,12 +48,12 @@ func main() {
 	)
 
 	c.OnHTML(".unit-result-item", func(e *colly.HTMLElement) {
-		temp := apartment{}
-		temp.availDate = getAvailableDate(e.ChildText(".avail-date"))
-		temp.unitTitle = e.ChildText(".unit-title")
-		temp.sqFootage = getSqFootage(e.ChildText(".sq-footage"))
-		temp.rent = getRent(e.ChildText(".rent"))
-		temp.bedrooms = getBedrooms(e.ChildText(".bedrooms"))
+		temp := Apartment{}
+		temp.AvailDate = getAvailableDate(e.ChildText(".avail-date"))
+		temp.UnitTitle = e.ChildText(".unit-title")
+		temp.SqFootage = getSqFootage(e.ChildText(".sq-footage"))
+		temp.Rent = getRent(e.ChildText(".rent"))
+		temp.Bedrooms = getBedrooms(e.ChildText(".bedrooms"))
 		apartments.insertApartment(temp)
 	})
 
@@ -74,29 +73,35 @@ func main() {
 	}
 
 	c.Wait()
-	displayAptmts(apartments)
-}
-
-func displayAptmts(apartments *tsafeApartments) {
-	aptmts := []apartment{}
+	aptmts := []Apartment{}
 	for aptmt := range apartments.apartments {
 		aptmts = append(aptmts, aptmt)
 	}
 	aptmts = sortFromCliConfig(aptmts)
-	for _, aptmt := range aptmts {
+	return aptmts
+}
+
+func main() {
+	handleCliConfigs()
+	apartments := GetApartments()
+	displayAptmts(apartments)
+}
+
+func displayAptmts(apartments []Apartment) {
+	for _, aptmt := range apartments {
 		fmt.Printf("%+v\n", aptmt)
 	}
 }
 
-func sortFromCliConfig(apts []apartment) []apartment {
+func sortFromCliConfig(apts []Apartment) []Apartment {
 	sort.SliceStable(apts, func(i, j int) bool {
 		switch sortedInput {
 		case rent:
-			return apts[i].rent < apts[j].rent
+			return apts[i].Rent < apts[j].Rent
 		case sqFeet:
-			return apts[i].sqFootage < apts[j].sqFootage
+			return apts[i].SqFootage < apts[j].SqFootage
 		case availDate:
-			return apts[i].availDate < apts[j].availDate
+			return apts[i].AvailDate < apts[j].AvailDate
 		default:
 			return true
 		}
