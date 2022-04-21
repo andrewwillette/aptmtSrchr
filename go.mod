@@ -1,4 +1,4 @@
-module andrewwillette.com/aptmtSrchr
+module github.com/andrewwillette/aptmtSrchr
 
 go 1.18
 
