@@ -7,5 +7,7 @@ import (
 
 func TestGetApartments(t *testing.T) {
 	apartments := GetApartments()
-	fmt.Println(apartments)	
+	for _, apt := range apartments {
+		fmt.Printf("%+v\n", apt)
+	}
 }

@@ -22,11 +22,12 @@ type tsafeApartments struct {
 }
 
 type Apartment struct {
-	AvailDate string
-	UnitTitle string
-	Bedrooms  int
-	SqFootage int
-	Rent      int
+	AvailDate string `json:"availDate"`
+	UnitTitle string `json:"unitTitle"`
+	Bedrooms  int    `json:"bedrooms"`
+	SqFootage int    `json:"sqFootage"`
+	Rent      int    `json:"rent"`
+	ViewUrl   string `json:"viewUrl"`
 }
 
 func (aptmts *tsafeApartments) insertApartment(apt Apartment) {
@@ -54,6 +55,7 @@ func GetApartments() []Apartment {
 		temp.SqFootage = getSqFootage(e.ChildText(".sq-footage"))
 		temp.Rent = getRent(e.ChildText(".rent"))
 		temp.Bedrooms = getBedrooms(e.ChildText(".bedrooms"))
+		temp.ViewUrl = getViewUrl(e.ChildAttr(".unit-link a", "href"))
 		apartments.insertApartment(temp)
 	})
 
@@ -128,6 +130,12 @@ func getSqFootage(html string) int {
 	result := r.FindString(html)
 	intVar, _ := strconv.Atoi(result)
 	return intVar
+}
+
+func getViewUrl(html string) string {
+	// r, _ := regexp.Compile(`\d{1,2}/\d{1,2}/\d{1,4}`)
+	return fmt.Sprintf("https://www.uli.com%s", html)
+	// return r.FindString(html)
 }
 
 func getAvailableDate(html string) string {
